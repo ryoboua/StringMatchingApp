@@ -2,4 +2,9 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  background: #8742F2;
+}
+
+html {
+  background-color: #8742F2;
 }
