@@ -3,9 +3,18 @@ import re
 import unicodedata
 import ngram
 import time
-import json
-import sys
 
+def fileCheck(fileName, company_list):
+    headers = list(company_list)
+    if 'Company' in str(headers):
+        return matchAccounts(fileName, company_list)
+    else:
+        return {
+            'parsingError': { 
+                'fileName': fileName,
+                'reason': 'File did not contain a column header titled Company'
+             }
+        }
 # Simple Parsing 
 def clean_string(s):
     if not isinstance(s, str):
@@ -16,6 +25,7 @@ def clean_string(s):
     return re.sub('\s+',' ',re.sub(r'([^\s\w]|_)+','',clean)).strip()
      
 def matchAccounts(fileName, company_list):
+
     startTime = time.time()
     # Read in Lists 
     sfdc_list = pd.read_csv('sfdc_accounts.csv', encoding = 'utf-8')
@@ -56,16 +66,16 @@ def matchAccounts(fileName, company_list):
     df = pd.DataFrame(results)
     df.columns = ['Company Name','Parsed Name', 'SFDC Name','Score']
     df = df[df.Score != 0]
+  
     df.to_csv('./ngram_results_' + fileName, encoding='utf-8')
     print('NGram Results Written to Disk')
     print(time.time() - startTime)
-#################################
-## Preping data to sent to client
+    #################################
+    ## Preping data to be sent to client
 
-# creating a list of lists from the the first item the headers of the dataframe
+    # creating a list of lists with the the first item as the headers of the dataframe
     
-    exact_matches= [list(exact_df)] + exact_df.as_matrix().tolist()
+    exact_matches = [list(exact_df)] + exact_df.as_matrix().tolist()
     ngram_results = [list(df)] + df.as_matrix().tolist()
     package = {'exact_matches': exact_matches, 'ngram_results' : ngram_results}
-
     return package

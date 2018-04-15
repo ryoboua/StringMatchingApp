@@ -9,7 +9,7 @@ const paperStyle = {
   textAlign: 'center',
   width: '45%',
   paddingBottom: '1em',
-  height: '550px'
+  height: 'auto'
 }
 class App extends Component {
   render() {
@@ -17,7 +17,7 @@ class App extends Component {
       <MuiThemeProvider>
         <div style={{display: 'flex', justifyContent: 'center'}} >
         <Paper style={paperStyle} zDepth={5} >
-          <h2 style={{color: '#E21660'}}>Top Hat String Matching App</h2>
+          <h1 style={{color: '#E21660'}}>Top Hat String Matching App</h1>
           <FileUploadContainer />
         </Paper>
         </div>
