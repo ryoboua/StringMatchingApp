@@ -5,6 +5,8 @@ import FileSaver from 'file-saver'
 import XLSX from 'xlsx'
 import csv from 'fast-csv'
 import RaisedButton from 'material-ui/RaisedButton'
+import CircularProgress from 'material-ui/CircularProgress';
+
 
 
 const  time = new Date()
@@ -19,37 +21,15 @@ const s2ab = s => {
     return buf;    
 }
 
-const generateExcel = (exactMatches, ngramResults) => {
-    let workbook = XLSX.utils.book_new()
-    workbook.Props = {
-        Title: 'Sring Results',
-        Author: 'James Ramsey and Reginald Yoboua'
-    }
-    //Creating Exact Matches Sheet
-    workbook.SheetNames.push('Exact Matches')
-    let exactMatchSheet = XLSX.utils.aoa_to_sheet(exactMatches)
-    workbook.Sheets['Exact Matches'] = exactMatchSheet
-
-    //Creating ngram Sheet
-    workbook.SheetNames.push('Ngram Results')
-    let ngramSheet = XLSX.utils.aoa_to_sheet(ngramResults)
-    workbook.Sheets['Ngram Results'] = ngramSheet
-
-    let workbook_out = XLSX.write(workbook,{bookType: 'xlsx', type: 'binary'})
-    let file = new Blob([s2ab(workbook_out)], {type: 'text/csv'})
-
-    FileSaver.saveAs(file, 'ngram_results_test')
-
-}
-
 export default class FileUploadContainer extends Component {
     constructor(props){
         super(props)
 
-        this.state={ filesToBeSent: [] }
+        this.state={ filesToBeSent: [], showForm: true }
         this.onDrop = this.onDrop.bind(this)
         this.onFormSubmit = this.onFormSubmit.bind(this)
         this.sendFiles = this.sendFiles.bind(this)
+        this.generateExcel = this.generateExcel.bind(this)
     }
 
     onDrop(acceptedFiles){
@@ -65,6 +45,7 @@ export default class FileUploadContainer extends Component {
     }
 
     sendFiles([file,...tail]){
+        this.setState({showForm: false})
         console.log(file.name);
         let req = request.post('http://127.0.0.1:5000/upload')
         req.attach(file.name, file)
@@ -72,9 +53,32 @@ export default class FileUploadContainer extends Component {
             async (err,res) => {
             if(err) console.log("error ocurred: ", err)
             if(tail.length) this.sendFiles(tail) 
-            return generateExcel(res.body.exact_matches, res.body.ngram_results)
+            return this.generateExcel(res.body.exact_matches, res.body.ngram_results)
 
         })
+    }
+
+    generateExcel(exactMatches, ngramResults){
+        let workbook = XLSX.utils.book_new()
+        workbook.Props = {
+            Title: 'Sring Results',
+            Author: 'James Ramsey and Reginald Yoboua'
+        }
+        //Creating Exact Matches Sheet
+        workbook.SheetNames.push('Exact Matches')
+        let exactMatchSheet = XLSX.utils.aoa_to_sheet(exactMatches)
+        workbook.Sheets['Exact Matches'] = exactMatchSheet
+    
+        //Creating ngram Sheet
+        workbook.SheetNames.push('Ngram Results')
+        let ngramSheet = XLSX.utils.aoa_to_sheet(ngramResults)
+        workbook.Sheets['Ngram Results'] = ngramSheet
+    
+        let workbook_out = XLSX.write(workbook,{bookType: 'xlsx', type: 'binary'})
+        let file = new Blob([s2ab(workbook_out)], {type: 'text/csv'})
+        this.setState({showForm: true})
+        FileSaver.saveAs(file, 'ngram_results_test')
+    
     }
 
     render(){
@@ -85,16 +89,32 @@ export default class FileUploadContainer extends Component {
         marginBottom: '2em',
         color: '#E21660'
        }
-  
+
+       const form = (
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} >
+                <Dropzone style={DropZoneStyle} accept='.csv' onDrop={files => this.onDrop(files)}>
+                    <div>
+                        <h3 style={{marginTop: '170px'}}>Try dropping some files here, or click to select files to upload.</h3>
+                    </div>
+                </Dropzone>
+                <RaisedButton
+                    backgroundColor='#E21660'
+                    labelColor='white' 
+                    label="Match Accounts" 
+                    primary={false} style={{}} 
+                    type='input'
+                />   
+            </div>
+        )
+
+       const circularProgress = <div style={{marginTop: '150px'}} ><CircularProgress style={{paddingBottom: '2em'}} size={80} thickness={5}/></div>
+
+       const content = this.state.showForm ? form : circularProgress
+
        return (
-                    <form encType="multipart/form-data" onSubmit={this.onFormSubmit} >
-                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} >
-                            <Dropzone style={DropZoneStyle} accept='.csv' onDrop={files => this.onDrop(files)}>
-                                <div><h3 style={{marginTop: '170px'}}>Try dropping some files here, or click to select files to upload.</h3></div>
-                            </Dropzone>
-                            <RaisedButton backgroundColor='#E21660' labelColor='white' label="Match Accounts" primary={false} style={{}} type='input' />
-                        </div>
-                    </form>
+            <form encType="multipart/form-data" onSubmit={this.onFormSubmit} >
+                {content}
+            </form>
         )
     }
 }
