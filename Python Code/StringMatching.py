@@ -71,11 +71,10 @@ def matchAccounts(fileName, company_list):
     print('NGram Results Written to Disk')
     print(time.time() - startTime)
     #################################
-    ## Preping data to be sent to client
-
-    # creating a list of lists with the the first item as the headers of the dataframe
-    
+    ## Prepping data to be sent to client
+    ## creating a list of lists with the the first item as the headers of the dataframe
     exact_matches = [list(exact_df)] + exact_df.as_matrix().tolist()
     ngram_results = [list(df)] + df.as_matrix().tolist()
+    
     package = {'exact_matches': exact_matches, 'ngram_results' : ngram_results}
     return package

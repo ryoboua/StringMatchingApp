@@ -6,7 +6,7 @@ import XLSX from 'xlsx'
 import RaisedButton from 'material-ui/RaisedButton'
 import CircularProgress from 'material-ui/CircularProgress';
 
-// - sheet.js tutorial on create excel files - https://redstapler.co/sheetjs-tutorial-create-xlsx/
+// - sheet.js tutorial on creating excel files - https://redstapler.co/sheetjs-tutorial-create-xlsx/
 const s2ab = s => { 
     var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
     var view = new Uint8Array(buf);  //create uint8array as viewer
@@ -32,7 +32,7 @@ export default class FileUploadContainer extends Component {
 
     onDrop(acceptedFiles){
         let filesToBeSent = this.state.filesToBeSent.concat(acceptedFiles)
-        this.setState({ filesToBeSent }, () => console.log(this.state.filesToBeSent.length))
+        this.setState({ filesToBeSent })
     }
 
     onFormSubmit(e){
@@ -65,7 +65,7 @@ export default class FileUploadContainer extends Component {
         const reason = res.body.parsingError.reason
         const newFileList = this.state.filesToBeSent.filter( file => file.name !== fileName)
         this.setState({filesToBeSent: newFileList})
-        alert(fileName + ' - ' + reason)
+        return alert(fileName + ' - ' + reason)
     }
 
 
@@ -105,6 +105,7 @@ export default class FileUploadContainer extends Component {
        }
 
        const fileList = this.state.filesToBeSent.map( (file, index) => <li key={index} style={{padding: '0.5em'}} >{file.name}</li>)
+       
        const form = (
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} >
                 <Dropzone style={DropZoneStyle} accept='.csv' onDrop={files => this.onDrop(files)}>

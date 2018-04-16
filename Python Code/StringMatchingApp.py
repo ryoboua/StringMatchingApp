@@ -16,7 +16,7 @@ def match_accounts():
                 print(fileName)
                 fileData = pd.read_csv(request.files[fileName], encoding = 'utf-8')
                 package = fileCheck(fileName, fileData)
-                #print(package)
+                print(package)
                 return jsonify(package)
             except:
                 return jsonify({'parsingError': { 'fileName': fileName,'reason': 'File broke the app'}})
